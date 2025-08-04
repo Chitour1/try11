@@ -89,7 +89,12 @@
 
             const signInWithGoogle = async () => {
                 setLoading(true);
-                const { error } = await supa.auth.signInWithOAuth({ provider: 'google' });
+                const { error } = await supa.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: 'https://chitour1.github.io/try11'
+                    }
+                });
                 if (error) {
                     alert(error.error_description || error.message);
                     setLoading(false);
