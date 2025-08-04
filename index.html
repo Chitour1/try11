@@ -1,37 +1,159 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>مفكرتي</title>
+    <title>Mofkera Pro - مفكرة المستقبل</title>
     
-    <!-- 1. Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 2. Load React Libraries -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- 3. Load Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- 4. Load Babel to transpile JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <script src="https://unpkg.com/react-quill@2.0.0/dist/react-quill.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/react-quill@2.0.0/dist/quill.snow.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Simple scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
+        :root {
+            --bg-color: #0D1117;
+            --primary-glow: #00A9FF;
+            --secondary-glow: #89CFF3;
+            --glass-bg: rgba(16, 19, 27, 0.6);
+            --border-color: rgba(56, 189, 248, 0.2);
+            --text-primary: #CDD6F4;
+            --text-secondary: #7f8ea3;
+            --font-family: 'Tajawal', sans-serif;
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            overflow: hidden;
+            background-image: radial-gradient(circle at 1% 1%, var(--primary-glow), transparent 25%), radial-gradient(circle at 99% 99%, var(--secondary-glow), transparent 25%);
+            background-attachment: fixed;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
+
+        .glass-pane {
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: 0 0 30px rgba(0, 169, 255, 0.15);
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+
+        .glow-button {
+            background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow));
+            color: white;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--primary-glow);
+            border: none;
+            font-weight: 500;
+        }
+        .glow-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+        .glow-button:disabled {
+             opacity: 0.5;
+             cursor: not-allowed;
+        }
+        
+        .secondary-button {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .secondary-button:hover {
+            background-color: rgba(0, 169, 255, 0.1);
+            border-color: var(--primary-glow);
+        }
+        .input-field {
+            background-color: rgba(13, 17, 23, 0.5);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 10px rgba(0, 169, 255, 0.3);
+        }
+
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-glow); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--secondary-glow); }
+
+        /* Quill Editor Dark Theme */
+        .ql-editor { color: var(--text-primary); font-size: 1.1rem; line-height: 1.8; }
+        .ql-snow .ql-stroke, .ql-snow .ql-fill { stroke: var(--text-secondary); }
+        .ql-snow .ql-picker-label { color: var(--text-secondary); }
+        .ql-snow .ql-tooltip { background-color: #1f2937; border-color: #374151; color: #d1d5db; }
+        .ql-snow.ql-toolbar { border-bottom: 1px solid var(--border-color) !important; }
+        .ql-snow .ql-formats button:hover .ql-stroke { stroke: var(--primary-glow); }
+        .ql-container.ql-snow { border: none !important; }
+        .ql-editor strong { color: var(--secondary-glow); }
+        .ql-editor h1, .ql-editor h2, .ql-editor h3 { color: var(--primary-glow); border-bottom: none; }
+        .ql-editor blockquote {
+            border-right: 4px solid var(--primary-glow);
+            padding-right: 1em;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        .ql-editor .ql-syntax {
+            background-color: #161b22;
+            color: #c9d1d9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+        }
+        
+        /* Graph Styles */
+        .graph-container .node circle {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .graph-container .node:hover circle {
+            transform: scale(1.5);
+        }
+        .graph-container .node text {
+            pointer-events: none;
+            fill: var(--text-primary);
+            font-size: 12px;
+            text-anchor: middle;
+        }
+        .graph-container .link {
+            stroke: var(--border-color);
+            stroke-opacity: 0.6;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 8px solid;
+            border-color: var(--border-color);
+            border-right-color: var(--primary-glow);
+            animation: spinner-d3wgkg 1s infinite linear;
+        }
+
+        @keyframes spinner-d3wgkg {
+            to {
+                transform: rotate(1turn);
+            }
         }
     </style>
 </head>
@@ -39,353 +161,633 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- React Application Code ---
-        
-        const { useState, useEffect, useCallback, Fragment } = React;
-        
-        // --- 1. Supabase Client Setup ---
+        // --- React & Library Imports ---
+        const { useState, useEffect, useCallback, useMemo, useRef, Fragment } = React;
         const { createClient } = supabase;
+        
+        // --- Supabase Client Setup (PRESERVED) ---
         const supabaseUrl = 'https://caafmpnmbahbrppphdtp.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhYWZtcG5tYmFoYnJwcHBoZHRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMDMxMjYsImV4cCI6MjA2OTg3OTEyNn0._rjE4DQ65jirrsotqAT57XSOgAWts91xK04bYcRmegk';
         const supa = createClient(supabaseUrl, supabaseAnonKey);
 
-        // --- Helper Icons (as SVG components) ---
-        const PlusIcon = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 ml-2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        // --- Icon Components ---
+        const Icon = ({ path, className = "w-5 h-5" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" d={path} />
             </svg>
         );
+        const ICONS = {
+            PLUS: "M12 4.5v15m7.5-7.5h-15",
+            TRASH: "m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0",
+            LOGOUT: "M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3h12",
+            LOCK_OPEN: "M13.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z",
+            LOCK_CLOSED: "M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z",
+            GRAPH: "M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L12 15.25l5.571-3M3 16.5l5.571-3 5.571 3M4.5 12l5.571 3 5.571-3",
+            HISTORY: "M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
+            AI_SPARKLE: "M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"
+        };
+        
+        // --- Main App Component ---
+        function App() {
+            const [session, setSession] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [notes, setNotes] = useState([]);
+            const [activeNote, setActiveNote] = useState(null);
+            const [encryptionKey, setEncryptionKey] = useState("");
+            const [showGraphView, setShowGraphView] = useState(false);
+            const [ai, setAi] = useState(null);
 
-        const TrashIcon = () => (
-             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-            </svg>
-        );
+            // AI SDK Initialization
+            useEffect(() => {
+                async function initializeAi() {
+                    try {
+                        // Polyfill process.env for browser environment
+                        if (typeof process === 'undefined') {
+                            window.process = { env: {} };
+                        }
+                        // Dynamically import the ESM module
+                        const { GoogleGenAI } = await import('https://esm.run/@google/generative-ai');
+                        // Initialize AI with API key (assumed to be in environment)
+                        const genAi = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                        setAi(genAi);
+                    } catch (err) {
+                        console.error("Could not initialize AI SDK. Summarization will be disabled.", err);
+                    }
+                }
+                initializeAi();
+            }, []);
 
-        const Bars3Icon = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-        );
-
-
-        // --- 2. Authentication Component ---
-        function Auth() {
-            const [loading, setLoading] = useState(false);
-            const [email, setEmail] = useState('');
-
-            const handleLogin = async (event) => {
-                event.preventDefault();
+            // Load from localStorage first for offline support
+            useEffect(() => {
+                try {
+                    const localNotes = localStorage.getItem('notes');
+                    if (localNotes) setNotes(JSON.parse(localNotes));
+                } catch (e) {
+                    console.error("Failed to parse local notes", e);
+                    localStorage.removeItem('notes');
+                }
+            }, []);
+            
+            // Auth and initial data fetch
+            useEffect(() => {
                 setLoading(true);
-                const { error } = await supa.auth.signInWithOtp({ 
-                    email,
-                    options: {
-                        emailRedirectTo: 'https://chitour1.github.io/try11'
+                supa.auth.getSession().then(({ data: { session } }) => {
+                    setSession(session);
+                    if (session) {
+                        fetchNotes(session.user.id);
+                    } else {
+                        setLoading(false);
                     }
                 });
 
-                if (error) {
-                    alert(error.error_description || error.message);
-                } else {
-                    alert('تفقد بريدك الإلكتروني للحصول على رابط الدخول!');
+                const { data: { subscription } } = supa.auth.onAuthStateChange((_event, session) => {
+                    setSession(session);
+                    if (!session) {
+                        setNotes([]);
+                        setActiveNote(null);
+                        setEncryptionKey("");
+                        localStorage.removeItem('notes');
+                    }
+                });
+                return () => subscription.unsubscribe();
+            }, []);
+            
+            const fetchNotes = async (userId) => {
+                try {
+                    const { data, error } = await supa.from('notes').select('*').eq('user_id', userId).order('updated_at', { ascending: false });
+                    if (error) throw error;
+                    setNotes(data || []);
+                    localStorage.setItem('notes', JSON.stringify(data || []));
+                } catch (error) {
+                    console.error("Error fetching notes:", error);
+                    alert("فشل في جلب الملاحظات من الخادم. سيتم عرض البيانات المحلية.");
+                } finally {
+                    setLoading(false);
                 }
-                setLoading(false);
             };
 
+            const handleSetNotes = (newNotes) => {
+                setNotes(newNotes);
+                try {
+                    localStorage.setItem('notes', JSON.stringify(newNotes));
+                } catch(e) {
+                     console.error("Failed to save notes to local storage", e);
+                }
+            };
+
+            if (loading) {
+                return (
+                    <div className="flex min-h-screen items-center justify-center bg-transparent">
+                        <div className="spinner"></div>
+                    </div>
+                );
+            }
+
+            if (!session) {
+                return <Auth />;
+            }
+
+            return (
+                <Notebook
+                    session={session}
+                    notes={notes}
+                    setNotes={handleSetNotes}
+                    activeNote={activeNote}
+                    setActiveNote={setActiveNote}
+                    encryptionKey={encryptionKey}
+                    setEncryptionKey={setEncryptionKey}
+                    showGraphView={showGraphView}
+                    setShowGraphView={setShowGraphView}
+                    ai={ai}
+                />
+            );
+        }
+
+        // --- Authentication Component ---
+        function Auth() {
+            const [loading, setLoading] = useState(false);
+            const [email, setEmail] = useState('');
+            const [message, setMessage] = useState('');
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setMessage('');
+                try {
+                    const { error } = await supa.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
+                    if (error) throw error;
+                    setMessage('تم إرسال رابط الدخول إلى بريدك الإلكتروني!');
+                } catch(error) {
+                    setMessage(error.error_description || error.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
             const signInWithGoogle = async () => {
                 setLoading(true);
                 const { error } = await supa.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: 'https://chitour1.github.io/try11'
+                        redirectTo: window.location.origin
                     }
                 });
                 if (error) {
-                    alert(error.error_description || error.message);
+                    setMessage(error.error_description || error.message);
                     setLoading(false);
                 }
             };
 
             return (
-                <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-                    <div className="w-full max-w-md space-y-8">
+                <div className="flex min-h-screen items-center justify-center p-4">
+                    <div className="w-full max-w-sm space-y-8 glass-pane p-8">
                         <div>
-                            <h1 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">مفكرتي</h1>
-                            <p className="mt-2 text-center text-sm text-gray-600">سجّل الدخول إلى حسابك للمتابعة</p>
+                            <h1 className="text-center text-3xl font-bold tracking-tight text-white">مفكرة المستقبل</h1>
+                            <p className="mt-2 text-center text-sm text-gray-400">سجل الدخول للمتابعة</p>
                         </div>
-                        <div className="bg-white p-8 shadow-xl rounded-lg">
-                            <form className="space-y-6" onSubmit={handleLogin}>
-                                <div>
-                                    <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
-                                    <input id="email-address" name="email" type="email" autoComplete="email" required
-                                        className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                                        placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-                                </div>
-                                <div>
-                                    <button type="submit"
-                                        className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                        disabled={loading}>
-                                        {loading ? 'جاري الإرسال...' : 'إرسال رابط الدخول'}
-                                    </button>
-                                </div>
-                            </form>
-                            <div className="relative my-6">
-                                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300" /></div>
-                                <div className="relative flex justify-center text-sm"><span className="bg-white px-2 text-gray-500">أو استمر باستخدام</span></div>
-                            </div>
-                            <div>
-                                <button type="button" onClick={signInWithGoogle}
-                                    className="group relative flex w-full items-center justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                    disabled={loading}>
-                                    <svg className="h-5 w-5 mr-2" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/>
-                                    </svg>
-                                    Google
-                                </button>
-                            </div>
+                        <form className="space-y-6" onSubmit={handleLogin}>
+                            <input type="email" required placeholder="بريدك الإلكتروني"
+                                className="w-full rounded-md px-3 py-2 text-white placeholder-gray-500 focus:outline-none input-field"
+                                value={email} onChange={(e) => setEmail(e.target.value)} />
+                            <button type="submit" disabled={loading} className="w-full glow-button disabled:opacity-50">
+                                {loading ? 'جاري الإرسال...' : 'إرسال الرابط السحري'}
+                            </button>
+                        </form>
+                        <div className="relative my-4">
+                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--border-color)]" /></div>
+                            <div className="relative flex justify-center text-sm"><span className="bg-[var(--glass-bg)] px-2 text-gray-400 rounded-full">أو</span></div>
                         </div>
+                        <button type="button" onClick={signInWithGoogle} disabled={loading}
+                            className="w-full secondary-button rounded-md flex items-center justify-center py-2 px-4 text-sm font-medium text-white hover:bg-gray-700/50 disabled:opacity-50">
+                            <svg className="h-5 w-5 mr-2" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            </svg>
+                            المتابعة باستخدام Google
+                        </button>
+                        {message && <p className="mt-4 text-center text-sm text-yellow-300">{message}</p>}
                     </div>
                 </div>
             );
         }
 
-        // --- 3. Notebook Application Component ---
-        function Notebook({ session }) {
-            const [notes, setNotes] = useState([]);
-            const [activeNote, setActiveNote] = useState(null);
-            const [loading, setLoading] = useState(true);
-            const [sidebarOpen, setSidebarOpen] = useState(false);
-            const [isSaving, setIsSaving] = useState(false);
-
-            useEffect(() => {
-                const fetchNotes = async () => {
-                    setLoading(true);
-                    const { data, error } = await supa.from('notes').select('*').eq('user_id', session.user.id).order('updated_at', { ascending: false });
-                    if (error) {
-                        console.error('Error fetching notes:', error);
-                        alert('حدث خطأ أثناء جلب الملاحظات.');
-                    } else {
-                        setNotes(data);
-                        if (data.length > 0) setActiveNote(data[0]);
-                    }
-                    setLoading(false);
-                };
-                fetchNotes();
-            }, [session.user.id]);
-
-            const debounce = (func, delay) => {
-                let timeout;
-                return function(...args) {
-                    const context = this;
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(context, args), delay);
-                };
-            };
-
-            const debouncedUpdate = useCallback(debounce(async (noteToUpdate) => {
-                setIsSaving(true);
-                const { id, ...updateData } = noteToUpdate;
-                const { error } = await supa.from('notes').update(updateData).eq('id', id);
-                if (error) {
-                    console.error('Error updating note:', error);
-                    alert('خطأ في حفظ الملاحظة.');
-                }
-                setIsSaving(false);
-            }, 1500), []);
-
-            const handleNoteUpdate = (field, value) => {
-                if (!activeNote) return;
-                const updatedNote = { ...activeNote, [field]: value, updated_at: new Date().toISOString() };
-                setActiveNote(updatedNote);
-                setNotes(notes.map(note => note.id === updatedNote.id ? updatedNote : note));
-                debouncedUpdate(updatedNote);
-            };
+        // --- Notebook Application Component ---
+        function Notebook({ session, notes, setNotes, activeNote, setActiveNote, encryptionKey, setEncryptionKey, showGraphView, setShowGraphView, ai }) {
 
             const handleAddNote = async () => {
                 const { data, error } = await supa.from('notes').insert({ title: 'ملاحظة جديدة', content: '', user_id: session.user.id }).select().single();
-                if (error) {
-                    console.error('Error adding note:', error);
-                    alert('حدث خطأ أثناء إضافة ملاحظة جديدة.');
-                } else {
+                if (error) console.error(error);
+                else {
                     setNotes([data, ...notes]);
                     setActiveNote(data);
-                    setSidebarOpen(false);
+                    setShowGraphView(false);
                 }
             };
-
+            
             const handleDeleteNote = async (noteId) => {
-                if (!window.confirm('هل أنت متأكد من رغبتك في حذف هذه الملاحظة؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+                if (!window.confirm("هل أنت متأكد من حذف هذه الملاحظة؟")) return;
                 const { error } = await supa.from('notes').delete().eq('id', noteId);
-                if (error) {
-                    console.error('Error deleting note:', error);
-                    alert('حدث خطأ أثناء حذف الملاحظة.');
-                } else {
-                    const newNotes = notes.filter(note => note.id !== noteId);
+                if (error) console.error(error);
+                else {
+                    const newNotes = notes.filter(n => n.id !== noteId);
                     setNotes(newNotes);
-                    if (activeNote && activeNote.id === noteId) {
-                        setActiveNote(newNotes.length > 0 ? newNotes[0] : null);
+                    if (activeNote?.id === noteId) {
+                        setActiveNote(newNotes[0] || null);
                     }
                 }
             };
-
-            const handleSelectNote = (note) => {
-                setActiveNote(note);
-                setSidebarOpen(false);
+            
+            const handleUpdateNote = async (noteId, updates) => {
+                const { error } = await supa.from('notes').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', noteId);
+                if (error) console.error("Update failed", error);
             };
 
+            const decryptedActiveNote = useMemo(() => {
+                if (!activeNote) return null;
+                if (!activeNote.is_encrypted) return activeNote;
+                if (!encryptionKey) return { ...activeNote, content: "<p><em>ملاحظة مشفرة. أدخل مفتاح التشفير لعرضها.</em></p>" };
+                try {
+                    const bytes = CryptoJS.AES.decrypt(activeNote.content, encryptionKey);
+                    const decryptedContent = bytes.toString(CryptoJS.enc.Utf8);
+                    if (!decryptedContent) throw new Error("Invalid key");
+                    return { ...activeNote, content: decryptedContent };
+                } catch (e) {
+                    return { ...activeNote, content: "<p><em>خطأ في فك التشفير. تأكد من المفتاح.</em></p>" };
+                }
+            }, [activeNote, encryptionKey]);
+
             return (
-                <div className="h-screen w-screen flex overflow-hidden bg-gray-100">
-                    {/* Mobile Sidebar */}
-                    {sidebarOpen && (
-                        <div className="relative z-40 md:hidden" role="dialog" aria-modal="true">
-                            <div className="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
-                            <div className="fixed inset-0 z-40 flex">
-                                <div className="relative flex w-full max-w-xs flex-1 flex-col bg-white">
-                                    <div className="absolute top-0 left-0 -ml-12 pt-2">
-                                        <button type="button" onClick={() => setSidebarOpen(false)}
-                                            className="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                                            <span className="sr-only">Close sidebar</span>
-                                            <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <NoteList notes={notes} activeNote={activeNote} onSelectNote={handleSelectNote} onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} />
-                                </div>
+                <div className="h-screen w-screen flex overflow-hidden p-4 gap-4">
+                    <Sidebar 
+                        notes={notes}
+                        activeNote={activeNote}
+                        setActiveNote={setActiveNote}
+                        onAddNote={handleAddNote}
+                        onDeleteNote={handleDeleteNote}
+                        setShowGraphView={setShowGraphView}
+                    />
+                    <main className="flex-1 flex flex-col glass-pane overflow-hidden">
+                        {showGraphView ? (
+                            <GraphView notes={notes} setActiveNote={setActiveNote} setShowGraphView={setShowGraphView}/>
+                        ) : activeNote ? (
+                            <Editor 
+                                key={activeNote.id} 
+                                note={decryptedActiveNote}
+                                notes={notes}
+                                setNotes={setNotes}
+                                setActiveNote={setActiveNote}
+                                onUpdate={handleUpdateNote}
+                                encryptionKey={encryptionKey}
+                                setEncryptionKey={setEncryptionKey}
+                                ai={ai}
+                            />
+                        ) : (
+                             <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-400 p-4">
+                                <h2 className="text-2xl font-semibold text-gray-300">ابدأ رحلتك المعرفية</h2>
+                                <p className="mt-2 max-w-md">اختر ملاحظة، أو أنشئ واحدة جديدة، أو استكشف خريطتك المعرفية.</p>
                             </div>
-                        </div>
-                    )}
-
-                    {/* Static sidebar for desktop */}
-                    <div className="hidden md:flex md:w-80 md:flex-col md:inset-y-0">
-                        <div className="flex flex-grow flex-col overflow-y-auto border-l border-gray-200 bg-white pt-5">
-                            <NoteList notes={notes} activeNote={activeNote} onSelectNote={handleSelectNote} onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} />
-                        </div>
-                    </div>
-
-                    {/* Main content area */}
-                    <div className="flex flex-1 flex-col">
-                        <div className="sticky top-0 z-10 bg-white pl-1 pt-1 sm:pl-3 sm:pt-3 md:hidden">
-                            <button type="button" onClick={() => setSidebarOpen(true)}
-                                className="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
-                                <span className="sr-only">Open sidebar</span>
-                                <Bars3Icon />
-                            </button>
-                        </div>
-                        <main className="flex-1 flex flex-col">
-                            {loading ? (
-                                <div className="flex-1 flex items-center justify-center text-gray-500">جاري تحميل الملاحظات...</div>
-                            ) : activeNote ? (
-                                <Editor key={activeNote.id} note={activeNote} onUpdate={handleNoteUpdate} isSaving={isSaving} />
-                            ) : (
-                                <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-500 p-4">
-                                    <h2 className="text-xl font-semibold">أهلاً بك في مفكرتك</h2>
-                                    <p className="mt-2">اختر ملاحظة من القائمة للبدء، أو قم بإنشاء واحدة جديدة.</p>
-                                    <button onClick={handleAddNote}
-                                        className="mt-4 inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                        <PlusIcon />
-                                        ملاحظة جديدة
-                                    </button>
-                                </div>
-                            )}
-                        </main>
-                    </div>
+                        )}
+                    </main>
                 </div>
             );
         }
-
-        function NoteList({ notes, activeNote, onSelectNote, onAddNote, onDeleteNote }) {
+        
+        // --- Sidebar Component ---
+        function Sidebar({ notes, activeNote, setActiveNote, onAddNote, onDeleteNote, setShowGraphView }) {
             const handleSignOut = async () => {
                 await supa.auth.signOut();
-                // Force a page reload to clear any residual state and ensure a clean login flow next time.
-                window.location.reload();
             };
-
+            
             return (
-                <div className="flex flex-col h-full">
-                    <div className="px-4 mb-4">
-                        <button type="button" onClick={onAddNote}
-                            className="flex w-full justify-center items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                            <PlusIcon />
-                            ملاحظة جديدة
+                <aside className="w-80 flex-col flex glass-pane p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                         <h2 className="text-xl font-bold text-white">مفكرتي</h2>
+                         <button onClick={handleSignOut} className="p-2 text-gray-400 hover:text-white transition-colors" title="تسجيل الخروج">
+                             <Icon path={ICONS.LOGOUT} />
+                         </button>
+                    </div>
+                     <div className="flex gap-2">
+                        <button onClick={onAddNote} className="flex-1 glow-button flex items-center justify-center gap-2 text-sm !py-2 !px-1">
+                            <Icon path={ICONS.PLUS} className="w-4 h-4"/> ملاحظة
+                        </button>
+                        <button onClick={() => setShowGraphView(v => !v)} className="flex-1 secondary-button rounded-md flex items-center justify-center gap-2 text-sm text-gray-300">
+                             <Icon path={ICONS.GRAPH} className="w-4 h-4"/> الخريطة
                         </button>
                     </div>
-                    <nav className="flex-1 space-y-1 px-2 pb-4 overflow-y-auto">
-                        {notes.map((note) => (
-                            <div key={note.id} className="relative group">
-                                <a href="#" onClick={(e) => { e.preventDefault(); onSelectNote(note); }}
-                                    className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${activeNote?.id === note.id ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-100'}`}>
-                                    <span className="truncate flex-1">{note.title || 'ملاحظة بلا عنوان'}</span>
-                                </a>
-                                <button onClick={(e) => { e.stopPropagation(); onDeleteNote(note.id); }}
-                                    className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-400 hover:bg-red-100 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    aria-label="Delete note">
-                                    <TrashIcon />
+
+                    <nav className="flex-1 space-y-1 overflow-y-auto -mr-2 pr-2">
+                        {notes.map(note => (
+                            <div key={note.id} 
+                                onClick={() => { setActiveNote(note); setShowGraphView(false); }}
+                                className={`group flex items-center justify-between p-2 rounded-md cursor-pointer transition-all ${activeNote?.id === note.id ? 'bg-blue-500/20' : 'hover:bg-gray-500/10'}`}
+                            >
+                                <span className="truncate flex-1 text-sm">{note.is_encrypted && <Icon path={ICONS.LOCK_CLOSED} className="w-4 h-4 inline-block ml-2 text-yellow-400"/>}{note.title || "ملاحظة بلا عنوان"}</span>
+                                <button onClick={(e) => {e.stopPropagation(); onDeleteNote(note.id)}} className="p-1 text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Icon path={ICONS.TRASH} className="w-4 h-4"/>
                                 </button>
                             </div>
                         ))}
                     </nav>
-                    <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
-                        <button onClick={handleSignOut} className="flex-shrink-0 group block w-full text-right">
-                            <div className="flex items-center">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">تسجيل الخروج</p>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
+                </aside>
             );
         }
+        
+        // --- Editor Component ---
+        function Editor({ note, notes, setNotes, setActiveNote, onUpdate, encryptionKey, setEncryptionKey, ai }) {
+            const [title, setTitle] = useState(note.title || '');
+            const [content, setContent] = useState(note.content || '');
+            const [isSaving, setIsSaving] = useState(false);
+            const [isSummarizing, setIsSummarizing] = useState(false);
+            const [showHistory, setShowHistory] = useState(false);
+            const [versions, setVersions] = useState([]);
 
-        function Editor({ note, onUpdate, isSaving }) {
-            return (
-                <div className="flex-1 flex flex-col h-full bg-white">
-                    <div className="p-4 border-b border-gray-200">
-                        <input type="text" value={note.title || ''} onChange={(e) => onUpdate('title', e.target.value)}
-                            placeholder="عنوان الملاحظة" className="text-2xl font-bold w-full focus:outline-none" />
-                    </div>
-                    <div className="flex-1 p-4 overflow-y-auto">
-                        <textarea value={note.content || ''} onChange={(e) => onUpdate('content', e.target.value)}
-                            placeholder="ابدأ الكتابة هنا..." className="w-full h-full resize-none focus:outline-none text-lg leading-relaxed" />
-                    </div>
-                    <div className="p-2 border-t border-gray-200 text-xs text-gray-400 text-left">
-                        {isSaving ? 'يتم الحفظ...' : 'تم حفظ جميع التغييرات'}
-                    </div>
-                </div>
+            const debouncedSave = useCallback(
+                debounce((newTitle, newContent) => {
+                    setIsSaving(true);
+                    const updates = {};
+                    let contentToSave = newContent;
+                    
+                    if(newTitle !== note.title) updates.title = newTitle;
+                    
+                    if(newContent !== note.content) {
+                       if (note.is_encrypted && encryptionKey) {
+                           contentToSave = CryptoJS.AES.encrypt(newContent, encryptionKey).toString();
+                       }
+                       updates.content = contentToSave;
+                       // Save a version (unencrypted for preview)
+                       supa.from('note_versions').insert({note_id: note.id, content: newContent}).then();
+                    }
+                    
+                    if(Object.keys(updates).length > 0){
+                        onUpdate(note.id, updates);
+                        const updatedLocalNote = {...note, title: newTitle, content: newContent};
+                        setNotes(currentNotes => currentNotes.map(n => n.id === note.id ? updatedLocalNote : n));
+                    }
+                    setTimeout(() => setIsSaving(false), 1000);
+                }, 1500), [note.id, note.is_encrypted, encryptionKey, note.title, note.content]
             );
-        }
-
-        // --- 4. Main App Component ---
-        function App() {
-            const [session, setSession] = useState(null);
-            const [loading, setLoading] = useState(true);
 
             useEffect(() => {
-                supa.auth.getSession().then(({ data: { session } }) => {
-                    setSession(session);
-                    setLoading(false);
-                });
+                setTitle(note.title || '');
+                setContent(note.content || '');
+            }, [note.id, note.content]);
 
-                const { data: { subscription } } = supa.auth.onAuthStateChange((_event, session) => {
-                    setSession(session);
-                });
+            useEffect(() => {
+                if(title !== note.title || content !== note.content) {
+                   debouncedSave(title, content);
+                }
+            }, [title, content, debouncedSave]);
+            
+            const handleToggleEncrypt = () => {
+                let currentKey = encryptionKey;
+                if(!currentKey && !note.is_encrypted) {
+                    const key = prompt("أدخل كلمة مرور جديدة للتشفير. تذكرها جيداً! لن تتمكن من استعادتها.");
+                    if(!key) return;
+                    setEncryptionKey(key);
+                    currentKey = key;
+                }
+                
+                const newEncryptedState = !note.is_encrypted;
+                let newContentForDB;
 
-                return () => subscription.unsubscribe();
-            }, []);
+                if (newEncryptedState) { // Encrypting
+                    newContentForDB = CryptoJS.AES.encrypt(content, currentKey).toString();
+                } else { // Decrypting
+                    newContentForDB = content; // The content is already decrypted in local state
+                }
 
-            if (loading) {
-                return <div className="flex min-h-screen items-center justify-center">جاري التحميل...</div>;
-            }
+                onUpdate(note.id, { is_encrypted: newEncryptedState, content: newContentForDB });
+                
+                const updatedNoteInState = {...note, is_encrypted: newEncryptedState, content: content};
+                setActiveNote(updatedNoteInState);
+                setNotes(notes.map(n => n.id === note.id ? updatedNoteInState : n));
+            };
 
-            if (!session) {
-                return <Auth />;
-            } else {
-                return <Notebook session={session} />;
-            }
+            const handleSummarize = async () => {
+                if (!content || !ai) return;
+                setIsSummarizing(true);
+                try {
+                    const plainTextContent = new DOMParser().parseFromString(content, "text/html").documentElement.textContent || "";
+                    if (plainTextContent.length < 50) {
+                        alert("المحتوى قصير جدًا لتلخيصه.");
+                        return;
+                    }
+                    const result = await ai.models.generateContent({
+                        model: "gemini-2.5-flash",
+                        contents: `Summarize the following text concisely in Arabic:\n\n---\n${plainTextContent}\n---`,
+                        config: {
+                           systemInstruction: "You are an expert summarizer. Your summaries are clear, concise, and in Arabic.",
+                           temperature: 0.5,
+                        }
+                    });
+                    
+                    const summaryHtml = `<blockquote class="border-r-4 border-[var(--primary-glow)] pr-4 my-4 italic"><strong>ملخص ذكي:</strong><br/>${result.text.replace(/\n/g, '<br/>')}</blockquote>`;
+                    setContent(prevContent => prevContent + summaryHtml);
+
+                } catch (error) {
+                    console.error("Error summarizing text:", error);
+                    alert("فشل في إنشاء الملخص. يرجى التحقق من مفتاح API والمحاولة مرة أخرى.");
+                } finally {
+                    setIsSummarizing(false);
+                }
+            };
+            
+            const fetchHistory = async () => {
+                const {data} = await supa.from('note_versions').select('*').eq('note_id', note.id).order('created_at', {ascending: false});
+                setVersions(data || []);
+                setShowHistory(true);
+            };
+
+            const restoreVersion = (versionContent) => {
+                setContent(versionContent);
+                setShowHistory(false);
+            };
+
+            const backlinks = useMemo(() => {
+                if (!note || !note.title) return [];
+                const titlePattern = `[[${note.title}]]`;
+                return notes.filter(n => n.id !== note.id && n.content && !n.is_encrypted && n.content.includes(titlePattern));
+            }, [notes, note.title, note.id]);
+            
+            const apiKeyExists = !!(window.process && process.env && process.env.API_KEY);
+
+            return (
+                <div className="flex-1 flex flex-col h-full">
+                    {showHistory && <VersionHistory versions={versions} onRestore={restoreVersion} onClose={() => setShowHistory(false)} />}
+                     <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between gap-4">
+                        <input type="text" value={title} onChange={e => setTitle(e.target.value)}
+                            placeholder="عنوان الملاحظة" className="text-2xl font-bold w-full focus:outline-none bg-transparent text-white" />
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                             <button onClick={fetchHistory} className="p-2 text-gray-400 hover:text-white transition-colors" title="سجل التعديلات"><Icon path={ICONS.HISTORY}/></button>
+                             <button onClick={handleToggleEncrypt} className="p-2 text-gray-400 hover:text-white transition-colors" title="تشفير الملاحظة">
+                                 <Icon path={note.is_encrypted ? ICONS.LOCK_CLOSED : ICONS.LOCK_OPEN} className={`w-5 h-5 ${note.is_encrypted ? 'text-yellow-400' : ''}`}/>
+                            </button>
+                             <button onClick={handleSummarize} disabled={isSummarizing || !ai || !apiKeyExists} className="p-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50" title="تلخيص ذكي">
+                                <Icon path={ICONS.AI_SPARKLE}/>
+                             </button>
+                            <span className="text-xs text-gray-500 w-20 text-left">{isSaving ? '...يتم الحفظ' : 'تم الحفظ'}</span>
+                        </div>
+                    </div>
+                    <div className="flex-1 flex overflow-hidden">
+                        <div className="flex-1 overflow-y-auto">
+                            <ReactQuill theme="snow" value={content} onChange={setContent} modules={{ toolbar: [[{ 'header': [1, 2, false] }], ['bold', 'italic', 'underline','strike', 'blockquote'], [{'list': 'ordered'}, {'list': 'bullet'}], ['link', 'image', 'code-block']] }} />
+                        </div>
+                        {backlinks.length > 0 && (
+                            <div className="w-64 border-r border-[var(--border-color)] p-4 overflow-y-auto">
+                                <h3 className="text-sm font-bold text-gray-400 mb-2">روابط خلفية</h3>
+                                {backlinks.map(b => (
+                                    <div key={b.id} onClick={() => setActiveNote(b)} className="text-xs p-2 rounded-md hover:bg-gray-500/10 cursor-pointer">{b.title}</div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
         }
 
-        // --- 5. Render the App ---
+        function VersionHistory({ versions, onRestore, onClose }) {
+             return (
+                 <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
+                     <div className="glass-pane w-full max-w-2xl h-2/3 p-4 flex flex-col" onClick={e => e.stopPropagation()}>
+                         <h2 className="text-xl font-bold mb-4">سجل التعديلات</h2>
+                         <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+                             {versions.length > 0 ? versions.map(v => (
+                                 <div key={v.id} className="p-3 rounded-md border border-gray-700 hover:border-blue-500 transition-all">
+                                     <div className="flex justify-between items-center">
+                                         <span className="text-sm text-gray-400">{new Date(v.created_at).toLocaleString('ar')}</span>
+                                         <button onClick={() => onRestore(v.content)} className="text-xs secondary-button rounded-md px-2 py-1">استعادة</button>
+                                     </div>
+                                     <div className="text-xs mt-2 text-gray-300 max-h-16 overflow-hidden bg-black/20 p-2 rounded-md" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(v.content.substring(0, 200) + '...') }}></div>
+                                 </div>
+                             )) : <p className="text-center text-gray-500">لا يوجد سجل تعديلات لهذه الملاحظة.</p>}
+                         </div>
+                     </div>
+                 </div>
+             );
+        }
+
+        function GraphView({notes, setActiveNote, setShowGraphView}) {
+            const containerRef = useRef(null);
+
+            const graphData = useMemo(() => {
+                const nodes = notes.map(note => ({ id: note.id, title: note.title, is_encrypted: note.is_encrypted }));
+                const links = [];
+                const noteTitleMap = new Map(notes.map(n => [n.title, n.id]));
+                const linkRegex = /\[\[(.*?)\]\]/g;
+
+                notes.forEach(note => {
+                    if (note.content && !note.is_encrypted) {
+                        let match;
+                        while((match = linkRegex.exec(note.content)) !== null) {
+                            const targetTitle = match[1];
+                            const targetId = noteTitleMap.get(targetTitle);
+                            if(targetId && targetId !== note.id) {
+                                links.push({ source: note.id, target: targetId });
+                            }
+                        }
+                    }
+                });
+
+                return { nodes, links };
+            }, [notes]);
+
+            useEffect(() => {
+                if (!containerRef.current || !graphData) return;
+                const { nodes, links } = graphData;
+
+                const width = containerRef.current.clientWidth;
+                const height = containerRef.current.clientHeight;
+
+                d3.select(containerRef.current).select("svg").remove();
+
+                const svg = d3.select(containerRef.current).append("svg")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .call(d3.zoom().on("zoom", (event) => g.attr("transform", event.transform)));
+
+                const g = svg.append("g");
+                
+                const simulation = d3.forceSimulation(nodes)
+                    .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+                    .force("charge", d3.forceManyBody().strength(-250))
+                    .force("center", d3.forceCenter(width / 2, height / 2))
+                    .force("x", d3.forceX())
+                    .force("y", d3.forceY());
+                    
+                const link = g.append("g")
+                    .attr("class", "links")
+                    .selectAll("line")
+                    .data(links)
+                    .enter().append("line")
+                    .attr("class", "link");
+
+                const node = g.append("g")
+                    .attr("class", "nodes")
+                    .selectAll("g")
+                    .data(nodes)
+                    .enter().append("g")
+                    .attr("class", "node")
+                    .call(drag(simulation))
+                    .on("click", (event, d) => {
+                       const note = notes.find(n => n.id === d.id);
+                       if(note) {
+                           setActiveNote(note);
+                           setShowGraphView(false);
+                       }
+                    });
+
+                node.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", d => d.is_encrypted ? "#FBBF24" : "var(--primary-glow)");
+
+                node.append("text")
+                    .text(d => d.title)
+                    .attr("dy", -15);
+                
+                simulation.on("tick", () => {
+                    link
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y);
+
+                    node.attr("transform", d => `translate(${d.x},${d.y})`);
+                });
+                
+                function drag(simulation) {
+                  function dragstarted(event, d) {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                  }
+                  function dragged(event, d) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                  }
+                  function dragended(event, d) {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                  }
+                  return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
+                }
+
+                return () => simulation.stop();
+            }, [graphData, notes, setActiveNote, setShowGraphView]);
+            
+            return <div ref={containerRef} className="w-full h-full graph-container"></div>
+        }
+
+        // --- Helper Functions ---
+        const debounce = (func, delay) => {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        };
+
+        // --- Render the App ---
         const container = document.getElementById('root');
         const root = ReactDOM.createRoot(container);
         root.render(<App />);
