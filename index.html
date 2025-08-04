@@ -77,7 +77,12 @@
             const handleLogin = async (event) => {
                 event.preventDefault();
                 setLoading(true);
-                const { error } = await supa.auth.signInWithOtp({ email });
+                const { error } = await supa.auth.signInWithOtp({ 
+                    email,
+                    options: {
+                        emailRedirectTo: 'https://chitour1.github.io/try11'
+                    }
+                });
 
                 if (error) {
                     alert(error.error_description || error.message);
@@ -290,6 +295,12 @@
         }
 
         function NoteList({ notes, activeNote, onSelectNote, onAddNote, onDeleteNote }) {
+            const handleSignOut = async () => {
+                await supa.auth.signOut();
+                // Force a page reload to clear any residual state and ensure a clean login flow next time.
+                window.location.reload();
+            };
+
             return (
                 <div className="flex flex-col h-full">
                     <div className="px-4 mb-4">
@@ -315,7 +326,7 @@
                         ))}
                     </nav>
                     <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
-                        <button onClick={() => supa.auth.signOut()} className="flex-shrink-0 group block w-full text-right">
+                        <button onClick={handleSignOut} className="flex-shrink-0 group block w-full text-right">
                             <div className="flex items-center">
                                 <div>
                                     <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">تسجيل الخروج</p>
